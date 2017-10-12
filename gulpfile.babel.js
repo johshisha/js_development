@@ -2,9 +2,12 @@
 /* eslint-disable function-paren-newline */
 
 import gulp from 'gulp';
+import gutil from 'gulp-util';
 import del from 'del';
 import eslint from 'gulp-eslint';
-import webpack from 'webpack-stream';
+import webpackStream from 'webpack-stream';
+import webpack from 'webpack';
+import WebpackDevServer from 'webpack-dev-server';
 import webpackConfig from './webpack.config.babel';
 
 const paths = {
@@ -16,6 +19,13 @@ const paths = {
   libDir: 'lib',
   distDir: 'dist',
 };
+
+// Compile files to distDir
+gulp.task('build', ['lint', 'clean'], () =>
+  gulp.src(paths.clientEntryPoint)
+    .pipe(webpackStream(webpackConfig))
+    .pipe(gulp.dest(paths.distDir)),
+);
 
 gulp.task('lint', () =>
   gulp.src([
@@ -33,14 +43,22 @@ gulp.task('clean', () => del([
   paths.clientBundle,
 ]));
 
-gulp.task('main', ['lint', 'clean'], () =>
-  gulp.src(paths.clientEntryPoint)
-    .pipe(webpack(webpackConfig))
-    .pipe(gulp.dest(paths.distDir)),
-);
+// For development
+gulp.task('default', ['webpack-dev-server']);
 
-gulp.task('watch', () => {
-  gulp.watch(paths.allSrcJs, ['main']);
+gulp.task('webpack-dev-server', ['lint', 'clean'], () => {
+  const myConfig = Object.create(webpackConfig);
+  myConfig.devtool = 'eval';
+
+  new WebpackDevServer(webpack(myConfig), {
+    contentBase: `${myConfig.devServer.contentBase}`,
+    // inline: true,
+    // hot: true, //--- remove this line for auto reloading on browser
+    stats: {
+      colors: true,
+    },
+  }).listen(8080, 'localhost', (err) => {
+    if (err) throw new gutil.PluginError('webpack-dev-server', err);
+    gutil.log('[webpack-dev-server]', 'http://localhost:8080/webpack-dev-server/index.html');
+  });
 });
-
-gulp.task('default', ['watch', 'main']);
