@@ -48,12 +48,11 @@ gulp.task('default', ['webpack-dev-server']);
 
 gulp.task('webpack-dev-server', ['lint', 'clean'], () => {
   const myConfig = Object.create(webpackConfig);
-  myConfig.devtool = 'eval';
 
   new WebpackDevServer(webpack(myConfig), {
     contentBase: `${myConfig.devServer.contentBase}`,
-    // inline: true,
-    // hot: true, //--- remove this line for auto reloading on browser
+    hot: true,
+    // progress: true,
     stats: {
       colors: true,
     },

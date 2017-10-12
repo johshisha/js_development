@@ -3,12 +3,15 @@ import webpack from 'webpack';
 
 export default {
   context: path.join(__dirname, '/src'),
-  entry: {
-    javascript: './client/app.jsx',
-  },
+  entry: [
+    // 'react-hot-loader/patch',
+    'webpack/hot/dev-server',
+    'webpack-dev-server/client?http://localhost:8080',
+    './client/app.jsx',
+  ],
   output: {
     filename: 'client-bundle.js',
-    publicPath: '/dist',
+    publicPath: '/',
   },
   devtool: 'source-map',
   devServer: {
