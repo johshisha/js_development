@@ -8,13 +8,15 @@ import eslint from 'gulp-eslint';
 import webpackStream from 'webpack-stream';
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
-import webpackConfig from './webpack.config.babel';
+import webpackDevConfig from './webpack.config.dev.babel';
+import webpackProdConfig from './webpack.config.prod.babel';
 
 const paths = {
   allSrcJs: 'src/**/*.js?(x)',
   clientEntryPoint: 'src/client/app.jsx',
   gulpFile: 'gulpfile.babel.js',
-  webpackFile: 'webpack.config.babel.js',
+  webpackDevFile: 'webpack.config.dev.babel.js',
+  webpackProdFile: 'webpack.config.prod.babel.js',
   clientBundle: 'dist/client-bundle.js?(.map)',
   libDir: 'lib',
   distDir: 'dist',
@@ -23,7 +25,7 @@ const paths = {
 // Compile files to distDir
 gulp.task('build', ['lint', 'clean'], () =>
   gulp.src(paths.clientEntryPoint)
-    .pipe(webpackStream(webpackConfig))
+    .pipe(webpackStream(webpackProdConfig))
     .pipe(gulp.dest(paths.distDir)),
 );
 
@@ -31,7 +33,8 @@ gulp.task('lint', () =>
   gulp.src([
     paths.allSrcJs,
     paths.gulpFile,
-    paths.webpackFile,
+    paths.webpackDevFile,
+    paths.webpackProdFile,
   ])
     .pipe(eslint())
     .pipe(eslint.format())
@@ -47,7 +50,7 @@ gulp.task('clean', () => del([
 gulp.task('default', ['webpack-dev-server']);
 
 gulp.task('webpack-dev-server', ['lint', 'clean'], () => {
-  const myConfig = Object.create(webpackConfig);
+  const myConfig = Object.create(webpackDevConfig);
 
   new WebpackDevServer(webpack(myConfig), {
     contentBase: `${myConfig.devServer.contentBase}`,
